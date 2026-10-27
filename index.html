@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>BEA Language Courses — Calculator 2027</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* ── UNAUTHORIZED SCREEN ── */
+        #unauthorizedScreen {
+            display: none;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(216, 48, 87, 0.15);
+            max-width: 420px;
+            width: 100%;
+            padding: 50px 40px;
+            text-align: center;
+        }
+        #unauthorizedScreen .lock-icon {
+            font-size: 56px;
+            margin-bottom: 20px;
+            display: block;
+        }
+        #unauthorizedScreen h2 {
+            color: #d83057;
+            font-size: 26px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+        #unauthorizedScreen p {
+            color: #888;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        #unauthorizedScreen .http-badge {
+            display: inline-block;
+            background: #fdf0f3;
+            border: 2px solid #f5c6d0;
+            color: #d83057;
+            font-size: 13px;
+            font-weight: 700;
+            border-radius: 8px;
+            padding: 6px 14px;
+            margin-top: 20px;
+            letter-spacing: 0.5px;
+        }
+
+        /* ── CALCULATOR ── */
+        #appScreen {
+            display: none;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(216, 48, 87, 0.15);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+        }
+        h1 { color: #d83057; font-size: 32px; font-weight: 700; margin-bottom: 10px; text-align: center; }
+        .subtitle { color: #666; text-align: center; margin-bottom: 40px; font-size: 14px; }
+        .form-group { margin-bottom: 25px; }
+        label { display: block; color: #000; font-weight: 600; margin-bottom: 8px; font-size: 14px; }
+        select, input[type="number"] {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s ease;
+            background: white;
+            color: #000;
+        }
+        select:focus, input[type="number"]:focus { outline: none; border-color: #d83057; box-shadow: 0 0 0 3px rgba(216, 48, 87, 0.1); }
+        select:hover, input[type="number"]:hover { border-color: #d83057; }
+        .result-container {
+            background: linear-gradient(135deg, #d83057 0%, #c02850 100%);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(216, 48, 87, 0.3);
+        }
+        .result-label { color: white; font-size: 14px; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; opacity: 0.9; }
+        .result-value { color: white; font-size: 48px; font-weight: 700; margin-bottom: 15px; }
+        .breakdown { color: white; font-size: 13px; opacity: 0.85; line-height: 1.6; }
+        .button-group { display: grid; grid-template-columns: 1fr; gap: 15px; margin-top: 25px; }
+        button {
+            padding: 16px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+        }
+        .btn-reset { background: white; color: #d83057; border: 2px solid #d83057; }
+        .btn-reset:hover { background: #d83057; color: white; }
+        .input-hint { font-size: 12px; color: #999; margin-top: 5px; }
+        .input-hint.warning { color: #d83057; }
+        .hidden { display: none; }
+        .eligibility-note {
+            display: none;
+            background: #fffbeb;
+            border: 2px solid #fcd34d;
+            border-left: 4px solid #f59e0b;
+            border-radius: 10px;
+            padding: 12px 14px;
+            margin-top: 10px;
+            font-size: 12.5px;
+            color: #78350f;
+            line-height: 1.6;
+        }
+        .eligibility-note strong { color: #92400e; }
+        .tax-note {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 10px;
+            padding: 10px 14px;
+            margin-top: 16px;
+            font-size: 12px;
+            color: white;
+            text-align: left;
+            line-height: 1.5;
+        }
+        .tax-note .icon { margin-right: 4px; }
+        .info-cards { display: grid; gap: 12px; }
+        .info-cards.cols-3 { grid-template-columns: repeat(3, 1fr); }
+        .info-cards.cols-2 { grid-template-columns: repeat(2, 1fr); }
+        .info-card {
+            background: #fdf0f3;
+            border: 2px solid #f5c6d0;
+            border-radius: 12px;
+            padding: 16px 12px;
+            text-align: center;
+        }
+        .info-card-value { color: #d83057; font-size: 26px; font-weight: 700; line-height: 1; margin-bottom: 6px; }
+        .info-card-label { color: #555; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .info-card-sub { color: #aaa; font-size: 11px; margin-top: 3px; }
+        .toggle-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .toggle-group.cols-3 { grid-template-columns: repeat(3, 1fr); }
+        .toggle-btn small { display:block; font-size:11px; font-weight:500; opacity:.75; margin-top:2px; }
+        .toggle-btn {
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            background: white;
+            color: #666;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Inter', sans-serif;
+            text-align: center;
+        }
+        .toggle-btn:hover { border-color: #d83057; color: #d83057; }
+        .toggle-btn.active { background: #d83057; border-color: #d83057; color: white; }
+        .toggle-btn.active:hover { color: white; opacity: .92; }
+        #eligibilityNote { margin: -10px 0 25px; }
+
+        @media (max-width: 600px) {
+            #appScreen { padding: 30px 20px; }
+            h1 { font-size: 26px; }
+            .result-value { font-size: 36px; }
+            .info-cards.cols-3 { grid-template-columns: 1fr; }
+            .info-cards.cols-2 { grid-template-columns: 1fr; }
+            .toggle-group.cols-3 { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ── UNAUTHORIZED ── -->
+    <div id="unauthorizedScreen">
+        <span class="lock-icon">🔒</span>
+        <h2>Unauthorized</h2>
+        <p>This tool is restricted to internal use only.<br>Please use the link provided by your team.</p>
+        <div class="http-badge">401 Unauthorized</div>
+    </div>
+
+    <!-- ── CALCULATOR ── -->
+    <div id="appScreen">
+        <h1>🎓 Language Courses</h1>
+        <p class="subtitle">Mainstream · Local Lingua · Individual — calculator · 2027</p>
+
+        <form id="calcForm">
+
+            <div class="form-group">
+                <label>Program</label>
+                <div class="toggle-group cols-3">
+                    <button type="button" class="toggle-btn" data-program="mainstream" onclick="selectProgram('mainstream')">👥 Mainstream<small>Group · EN / DE</small></button>
+                    <button type="button" class="toggle-btn" data-program="locallingua" onclick="selectProgram('locallingua')">🌍 Local Lingua<small>Group · PT / PL / CZ</small></button>
+                    <button type="button" class="toggle-btn" data-program="individual" onclick="selectProgram('individual')">👤 Individual<small>1-on-1 · 6 languages</small></button>
+                </div>
+            </div>
+
+            <!-- Eligibility note for Individual -->
+            <div class="eligibility-note" id="eligibilityNote">
+                ⚠️ <strong>Warning:</strong> Only employees at grade <strong>M3 / P4 and above</strong> are eligible to enroll in individual courses. Exceptions for lower grades may be granted in cases of critical business need.
+            </div>
+
+            <div class="form-group hidden" id="languageContainer">
+                <label for="language">Language</label>
+                <select id="language">
+                    <option value="">Select language</option>
+                </select>
+            </div>
+
+            <div class="form-group hidden" id="locationContainer">
+                <label for="location">Location</label>
+                <select id="location">
+                    <option value="">Select location</option>
+                    <option value="ukraine">Ukraine</option>
+                    <option value="moldova">Moldova</option>
+                    <option value="portugal">Portugal</option>
+                    <option value="poland">Poland</option>
+                    <option value="czech">Czech Republic</option>
+                    <option value="netherlands">Netherlands</option>
+                    <option value="luxembourg">Luxembourg</option>
+                    <option value="italy">Italy</option>
+                    <option value="belgium">Belgium</option>
+                    <option value="france">France</option>
+                    <option value="germany">Germany</option>
+                </select>
+            </div>
+
+            <div class="form-group hidden" id="teacherContainer">
+                <label>Teacher Type</label>
+                <div class="toggle-group">
+                    <button type="button" class="toggle-btn" id="btnLocal" onclick="selectTeacher('local')">🧑‍🏫 Non-native</button>
+                    <button type="button" class="toggle-btn" id="btnNative" onclick="selectTeacher('native')">🌍 Native</button>
+                </div>
+                <div class="input-hint" style="margin-top:10px; display:flex; flex-direction:column; gap:5px;">
+                    <span>🧑‍🏫 <strong>Non-native</strong> — qualified teacher, the target language is not their first language</span>
+                    <span>🌍 <strong>Native</strong> — a teacher from a target language-speaking country</span>
+                </div>
+            </div>
+
+            <div class="form-group hidden" id="infoCardsContainer"></div>
+
+            <div class="form-group hidden" id="lessonsContainer">
+                <label for="lessonsPerWeek">Lessons per Week</label>
+                <input type="number" id="lessonsPerWeek" min="1" max="7" placeholder="Enter number (1–7)">
+                <div class="input-hint">Standard format: <strong>2 lessons per week</strong>, 60 min each</div>
+            </div>
+
+            <div class="form-group hidden" id="periodContainer">
+                <label for="startMonth">Month of Joining</label>
+                <select id="startMonth">
+                    <option value="">Select month</option>
+                    <option value="1">January 2027</option>
+                    <option value="2">February 2027</option>
+                    <option value="3">March 2027</option>
+                    <option value="4">April 2027</option>
+                    <option value="5">May 2027</option>
+                    <option value="6">June 2027</option>
+                    <option value="7">July 2027</option>
+                    <option value="8">August 2027</option>
+                    <option value="9">September 2027</option>
+                    <option value="10">October 2027</option>
+                    <option value="11">November 2027</option>
+                    <option value="12">December 2027</option>
+                </select>
+            </div>
+
+            <div class="form-group hidden" id="durationContainer">
+                <label for="duration">Training Period</label>
+                <select id="duration">
+                    <option value="">Select period</option>
+                    <option value="3">3 months</option>
+                    <option value="6">6 months</option>
+                    <option value="9">9 months</option>
+                    <option value="12">12 months</option>
+                </select>
+                <div class="input-hint" id="periodHint">Select month of joining and training period</div>
+            </div>
+
+            <div class="result-container hidden" id="resultContainer">
+                <div class="result-label" id="resultLabel">Total Investment</div>
+                <div class="result-value" id="totalCost">€0.00</div>
+                <div class="breakdown" id="breakdown"></div>
+                <div class="tax-note hidden" id="taxNote"></div>
+            </div>
+
+            <div class="button-group hidden" id="buttonGroup">
+                <button type="button" class="btn-reset" onclick="resetForm()">Reset</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        /* ── ACCESS CONTROL ── */
+        const SECRET_KEY = 'esfera-2026-internal';
+        const ACCESS_CHECK_ENABLED = true; // false — отключить проверку ключа
+        const params = new URLSearchParams(window.location.search);
+        if (!ACCESS_CHECK_ENABLED || params.get('key') === SECRET_KEY) {
+            document.getElementById('appScreen').style.display = 'block';
+        } else {
+            document.getElementById('unauthorizedScreen').style.display = 'block';
+        }
+
+        /* ── UKRAINE EMPLOYEE TAX (Mainstream + Individual) ── */
+        const UKRAINE_TAX_MULTIPLIER = 1.30;
+        const UKRAINE_TAX_ENABLED    = true;
+
+        /* ── PROGRAMS ── */
+        const LANGUAGE_LABELS = {
+            english: 'English', german: 'German', polish: 'Polish',
+            portuguese: 'Portuguese', french: 'French', spanish: 'Spanish', czech: 'Czech',
+        };
+        const PROGRAM_LANGUAGES = {
+            mainstream:  ['english', 'german'],
+            locallingua: ['portuguese', 'polish', 'czech'],
+            individual:  ['english', 'german', 'polish', 'portuguese', 'french', 'spanish'],
+        };
+        const PROGRAM_LABELS = { mainstream: 'Mainstream', locallingua: 'Local Lingua', individual: 'Individual' };
+
+        // Local Lingua: language ↔ country 1:1
+        const LL_LOCATIONS = { portuguese: 'Portugal', polish: 'Poland', czech: 'Czech Republic' };
+        const LL_PRICE     = 24;
+
+        /* ── PRICES ── */
+        const PRICES_GROUP = {
+            ukraine:     { price: 20,   currency: '€' },
+            moldova:     { price: 21.5, currency: '€' },
+            portugal:    { price: 24,   currency: '€' },
+            poland:      { price: 24,   currency: '€' },
+            czech:       { price: 24,   currency: '€' },
+            netherlands: { price: 24,   currency: '€' },
+            luxembourg:  { price: 24,   currency: '€' },
+            italy:       { price: 24,   currency: '€' },
+            belgium:     { price: 24,   currency: '€' },
+            france:      { price: 24,   currency: '€' },
+            uk:          { price: 24,   currency: '€' },
+            germany:     { price: 24,   currency: '€' },
+        };
+        const PRICES_INDIVIDUAL = {
+            ukraine:     { local: 13.8, native: 20,   currency: '€' },
+            moldova:     { local: 15,   native: 21.5, currency: '€' },
+            portugal:    { local: 17.2, native: 24,   currency: '€' },
+            poland:      { local: 17.2, native: 24,   currency: '€' },
+            czech:       { local: 17.2, native: 24,   currency: '€' },
+            netherlands: { local: 17.2, native: 24,   currency: '€' },
+            luxembourg:  { local: 17.2, native: 24,   currency: '€' },
+            italy:       { local: 17.2, native: 24,   currency: '€' },
+            belgium:     { local: 17.2, native: 24,   currency: '€' },
+            france:      { local: 17.2, native: 24,   currency: '€' },
+            uk:          { local: 17.2, native: 24,   currency: '€' },
+            germany:     { local: 17.2, native: 24,   currency: '€' },
+        };
+
+        const MONTHS = ['','January','February','March','April','May','June',
+                        'July','August','September','October','November','December'];
+        const YEAR   = 2027;
+
+        // Remove past months from dropdown
+        (function () {
+            const now = new Date();
+            const cy = now.getFullYear(), cm = now.getMonth() + 1;
+            Array.from(document.getElementById('startMonth').options).forEach(opt => {
+                const v = parseInt(opt.value);
+                if (!v) return;
+                if (cy > YEAR || (cy === YEAR && v < cm)) opt.remove();
+            });
+        })();
+
+        function fmt(n) { return n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+        function fmtDate(d) { return MONTHS[d.getMonth() + 1] + ' ' + d.getDate() + ', ' + d.getFullYear(); }
+        function num(n) { return Number.isInteger(n) ? n : +n.toFixed(2); }
+        function show(id) { document.getElementById(id).classList.remove('hidden'); }
+        function hide(id) { document.getElementById(id).classList.add('hidden'); }
+        function $(id) { return document.getElementById(id); }
+
+        let program = null;
+        let selectedTeacher = null;
+        let lessonPrice = null;
+        let currency = '€';
+
+        const STEPS = ['languageContainer','locationContainer','teacherContainer','infoCardsContainer',
+                       'lessonsContainer','periodContainer','durationContainer','buttonGroup','resultContainer'];
+
+        function clearFrom(ids) {
+            ids.forEach(hide);
+            if (ids.includes('locationContainer'))  $('location').value = '';
+            if (ids.includes('periodContainer'))    $('startMonth').value = '';
+            if (ids.includes('durationContainer'))  $('duration').value = '';
+            if (ids.includes('lessonsContainer'))   $('lessonsPerWeek').value = '';
+            if (ids.includes('teacherContainer')) {
+                $('btnLocal').classList.remove('active');
+                $('btnNative').classList.remove('active');
+                selectedTeacher = null;
+            }
+            if (ids.includes('infoCardsContainer')) { $('infoCardsContainer').innerHTML = ''; lessonPrice = null; }
+            $('periodHint').className = 'input-hint';
+            $('periodHint').textContent = 'Select month of joining and training period';
+        }
+
+        function showPeriod() {
+            show('periodContainer');
+            show('durationContainer');
+            show('buttonGroup');
+        }
+
+        /* ── STEP 1: PROGRAM ── */
+        function selectProgram(p) {
+            program = p;
+            document.querySelectorAll('[data-program]').forEach(b => b.classList.toggle('active', b.dataset.program === p));
+            clearFrom(STEPS);
+            $('eligibilityNote').style.display = p === 'individual' ? 'block' : 'none';
+
+            $('language').innerHTML = '<option value="">Select language</option>' +
+                PROGRAM_LANGUAGES[p].map(l => '<option value="' + l + '">' + LANGUAGE_LABELS[l] + '</option>').join('');
+            show('languageContainer');
+
+            // Mainstream groups: joining only until September
+            Array.from($('startMonth').options).forEach(opt => {
+                const v = parseInt(opt.value);
+                if (!v) return;
+                opt.style.display = (p === 'mainstream' && v > 9) ? 'none' : '';
+            });
+        }
+
+        /* ── STEP 2: LANGUAGE ── */
+        $('language').addEventListener('change', function () {
+            clearFrom(STEPS.filter(s => s !== 'languageContainer'));
+            if (!this.value) return;
+
+            if (program === 'locallingua') {
+                lessonPrice = LL_PRICE;
+                currency = '€';
+                $('infoCardsContainer').innerHTML = groupCards(LL_PRICE);
+                show('infoCardsContainer');
+                showPeriod();
+            } else {
+                show('locationContainer');
+            }
+        });
+
+        function groupCards(price) {
+            return `
+                <div class="info-cards cols-3">
+                    <div class="info-card">
+                        <div class="info-card-value">${num(price)}</div>
+                        <div class="info-card-label">Cost per Lesson, €</div>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-card-value">5</div>
+                        <div class="info-card-label">People in Group</div>
+                        <div class="info-card-sub">range: 4–6</div>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-card-value">2</div>
+                        <div class="info-card-label">Lessons per Week</div>
+                    </div>
+                </div>`;
+        }
+
+        /* ── STEP 3: LOCATION ── */
+        $('location').addEventListener('change', function () {
+            clearFrom(['teacherContainer','infoCardsContainer','lessonsContainer',
+                       'periodContainer','durationContainer','buttonGroup','resultContainer']);
+            if (!this.value) return;
+
+            if (program === 'mainstream') {
+                const entry = PRICES_GROUP[this.value];
+                if (!entry) return;
+                lessonPrice = entry.price;
+                currency    = entry.currency;
+                $('infoCardsContainer').innerHTML = groupCards(entry.price);
+                show('infoCardsContainer');
+                showPeriod();
+            } else {
+                show('teacherContainer');
+            }
+        });
+
+        /* ── STEP 4 (Individual): TEACHER ── */
+        function selectTeacher(type) {
+            selectedTeacher = type;
+            $('btnLocal').classList.toggle('active',  type === 'local');
+            $('btnNative').classList.toggle('active', type === 'native');
+
+            const entry = PRICES_INDIVIDUAL[$('location').value];
+            if (!entry) return;
+            lessonPrice = entry[type];
+            currency    = entry.currency;
+
+            $('infoCardsContainer').innerHTML = `
+                <div class="info-cards cols-2">
+                    <div class="info-card">
+                        <div class="info-card-value">${num(lessonPrice)}</div>
+                        <div class="info-card-label">Cost per Lesson, ${currency}</div>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-card-value">${type === 'native' ? 'Native' : 'Non-native'}</div>
+                        <div class="info-card-label">Teacher Type</div>
+                    </div>
+                </div>`;
+            show('infoCardsContainer');
+            show('lessonsContainer');
+            showPeriod();
+            calc();
+        }
+
+        $('lessonsPerWeek').addEventListener('input', calc);
+        $('startMonth').addEventListener('change', calc);
+        $('duration').addEventListener('change', calc);
+        $('calcForm').addEventListener('submit', e => { e.preventDefault(); calc(); });
+
+        /* ── CALCULATION ── */
+        function calc() {
+            const cost     = lessonPrice || 0;
+            const cur      = currency || '€';
+            const sm       = parseInt($('startMonth').value) || 0;
+            const dur      = parseInt($('duration').value) || 0;
+            const hintEl   = $('periodHint');
+            const resultEl = $('resultContainer');
+
+            hintEl.className = 'input-hint';
+            $('taxNote').classList.add('hidden');
+
+            let lpw = 2;
+            if (program === 'individual') {
+                lpw = parseInt($('lessonsPerWeek').value) || 0;
+                if (!lpw) { resultEl.classList.add('hidden'); return; }
+                if (lpw < 1 || lpw > 7) {
+                    hintEl.className   = 'input-hint warning';
+                    hintEl.textContent = 'Please enter between 1 and 7 lessons per week';
+                    resultEl.classList.add('hidden');
+                    return;
+                }
+            }
+
+            if (!cost || !sm || !dur) { resultEl.classList.add('hidden'); return; }
+
+            const startDay  = sm === 1 ? 11 : 1;
+            const startDate = new Date(YEAR, sm - 1, startDay);
+            // End date = start + N months − 1 day
+            const endDate   = new Date(YEAR, sm - 1 + dur, startDay - 1);
+
+            const days         = Math.round((endDate - startDate) / 86400000) + 1;
+            const weeks        = days / 7;
+            const weeksRound   = Math.round(weeks * 10) / 10;
+            const totalLessons = Math.round(weeks * lpw);
+            const langVal      = $('language').value;
+            const langName     = LANGUAGE_LABELS[langVal] || '';
+            const loc          = $('location');
+            const locValue     = program === 'locallingua' ? '' : loc.value;
+            const locName      = program === 'locallingua' ? (LL_LOCATIONS[langVal] || '')
+                                                           : (loc.options[loc.selectedIndex]?.text || '');
+            const periodLine   = '<strong>' + fmtDate(startDate) + ' &rarr; ' + fmtDate(endDate) + '</strong> (' + dur + ' months)<br>';
+
+            let subtotal, breakdownHTML;
+
+            if (program === 'individual') {
+                subtotal = cost * totalLessons;
+                const teacherLabel = selectedTeacher === 'native' ? 'Native' : 'Non-native';
+                breakdownHTML = periodLine +
+                    weeksRound + ' weeks &times; ' + lpw + ' lessons/week = <strong>' + totalLessons + ' lessons</strong><br>' +
+                    cur + num(cost) + '/lesson &middot; ' + teacherLabel + '<br>' +
+                    'Individual &middot; ' + langName + ' &middot; ' + locName;
+            } else {
+                const perPerson = cost / 5;
+                subtotal = perPerson * totalLessons;
+                breakdownHTML = periodLine +
+                    weeksRound + ' weeks &times; 2 lessons/week = <strong>' + totalLessons + ' lessons</strong><br>' +
+                    cur + num(cost) + ' &divide; 5 people = ' + cur + fmt(perPerson) + '/person per lesson<br>' +
+                    PROGRAM_LABELS[program] + ' &middot; ' + langName + ' &middot; ' + locName;
+            }
+
+            let grand = subtotal;
+            const taxNoteEl = $('taxNote');
+            taxNoteEl.innerHTML = '';
+
+            // Ukraine employee tax: Mainstream + Individual
+            if (UKRAINE_TAX_ENABLED && locValue === 'ukraine' && program !== 'locallingua') {
+                grand = subtotal * UKRAINE_TAX_MULTIPLIER;
+                taxNoteEl.innerHTML =
+                    '<span class="icon">⚠️</span><strong>Includes employee tax (Ukraine)</strong><br>' +
+                    'Subtotal ' + cur + fmt(subtotal) + ' × 1.30 = ' + cur + fmt(grand);
+                taxNoteEl.classList.remove('hidden');
+            }
+
+            hintEl.textContent = fmtDate(startDate) + ' – ' + fmtDate(endDate) + ' (' + dur + ' months, ' + weeksRound + ' weeks)';
+            $('resultLabel').textContent = program === 'individual' ? 'Total Investment' : 'Total Investment per Student';
+            $('totalCost').textContent = cur + fmt(grand);
+            $('breakdown').innerHTML = breakdownHTML;
+            show('resultContainer');
+        }
+
+        function resetForm() {
+            $('calcForm').reset();
+            program = null;
+            document.querySelectorAll('[data-program]').forEach(b => b.classList.remove('active'));
+            $('eligibilityNote').style.display = 'none';
+            $('language').innerHTML = '<option value="">Select language</option>';
+            clearFrom(STEPS);
+            $('taxNote').innerHTML = '';
+        }
+    </script>
+</body>
+</html>
