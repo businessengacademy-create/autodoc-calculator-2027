@@ -283,7 +283,7 @@
                     <option value="3">3 months</option>
                     <option value="6">6 months</option>
                     <option value="9">9 months</option>
-                    <option value="12">12 months</option>
+                    <option value="10.5">10.5 months</option>
                 </select>
                 <div class="input-hint" id="periodHint">Select month of joining and training period</div>
             </div>
@@ -525,7 +525,7 @@
             const cost     = lessonPrice || 0;
             const cur      = currency || '€';
             const sm       = parseInt($('startMonth').value) || 0;
-            const dur      = parseInt($('duration').value) || 0;
+            const dur      = parseFloat($('duration').value) || 0;
             const hintEl   = $('periodHint');
             const resultEl = $('resultContainer');
 
@@ -548,8 +548,13 @@
 
             const startDay  = sm === 1 ? 11 : 1;
             const startDate = new Date(YEAR, sm - 1, startDay);
-            // End date = start + N months − 1 day
-            const endDate   = new Date(YEAR, sm - 1 + dur, startDay - 1);
+            // End date = start + N months − 1 day (half month = half of the following month's days)
+            const fullM     = Math.floor(dur);
+            const endDate   = new Date(YEAR, sm - 1 + fullM, startDay - 1);
+            if (dur > fullM) {
+                const nextMonthDays = new Date(YEAR, sm - 1 + fullM + 1, 0).getDate();
+                endDate.setDate(endDate.getDate() + Math.round(nextMonthDays * (dur - fullM)));
+            }
 
             const days         = Math.round((endDate - startDate) / 86400000) + 1;
             const weeks        = days / 7;
