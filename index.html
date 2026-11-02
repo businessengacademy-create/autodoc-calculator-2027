@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ё<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -378,7 +378,12 @@
         })();
 
         function fmt(n) { return n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
-        function fmtDate(d) { return MONTHS[d.getMonth() + 1] + ' ' + d.getDate() + ', ' + d.getFullYear(); }
+        function fmtDate(d) { return MONTHS[d.getMonth() + 1] + ' ' + d.getFullYear(); }
+        // No exact days: "April 2027" / "mid-December 2027"
+        function fmtEnd(d) {
+            const day = d.getDate();
+            return (day >= 11 && day <= 20 ? 'mid-' : '') + MONTHS[d.getMonth() + 1] + ' ' + d.getFullYear();
+        }
         function num(n) { return Number.isInteger(n) ? n : +n.toFixed(2); }
         function show(id) { document.getElementById(id).classList.remove('hidden'); }
         function hide(id) { document.getElementById(id).classList.add('hidden'); }
@@ -549,12 +554,11 @@
             const startDay  = sm === 1 ? 11 : 1;
             const startDate = new Date(YEAR, sm - 1, startDay);
             // End date = start + N months − 1 day (half month = half of the following month's days)
+            // 10.5 months = until mid of the 11th month (January start → mid-December)
             const fullM     = Math.floor(dur);
-            const endDate   = new Date(YEAR, sm - 1 + fullM, startDay - 1);
-            if (dur > fullM) {
-                const nextMonthDays = new Date(YEAR, sm - 1 + fullM + 1, 0).getDate();
-                endDate.setDate(endDate.getDate() + Math.round(nextMonthDays * (dur - fullM)));
-            }
+            const endDate   = dur > fullM
+                ? new Date(YEAR, sm - 1 + fullM + 1, 15)
+                : new Date(YEAR, sm - 1 + fullM, startDay - 1);
 
             const days         = Math.round((endDate - startDate) / 86400000) + 1;
             const weeks        = days / 7;
@@ -566,7 +570,7 @@
             const locValue     = program === 'locallingua' ? '' : loc.value;
             const locName      = program === 'locallingua' ? (LL_LOCATIONS[langVal] || '')
                                                            : (loc.options[loc.selectedIndex]?.text || '');
-            const periodLine   = '<strong>' + fmtDate(startDate) + ' &rarr; ' + fmtDate(endDate) + '</strong> (' + dur + ' months)<br>';
+            const periodLine   = '<strong>' + fmtDate(startDate) + ' &rarr; ' + fmtEnd(endDate) + '</strong> (' + dur + ' months)<br>';
 
             let subtotal, breakdownHTML;
 
@@ -599,7 +603,7 @@
                 taxNoteEl.classList.remove('hidden');
             }
 
-            hintEl.textContent = fmtDate(startDate) + ' – ' + fmtDate(endDate) + ' (' + dur + ' months, ' + weeksRound + ' weeks)';
+            hintEl.textContent = fmtDate(startDate) + ' – ' + fmtEnd(endDate) + ' (' + dur + ' months, ' + weeksRound + ' weeks)';
             $('resultLabel').textContent = program === 'individual' ? 'Total Investment' : 'Total Investment per Student';
             $('totalCost').textContent = cur + fmt(grand);
             $('breakdown').innerHTML = breakdownHTML;
